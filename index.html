@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Paced Heart</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="An illustrated, interactive guide to the perioperative management of pacemakers and defibrillators.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <header class="masthead">
+    <p class="eyebrow">An illustrated, interactive guide · Cardiac implantable electronic devices</p>
+    <h1 class="title">The Heart, <em>Paced.</em></h1>
+    <p class="subtitle">Pacing and its timing, electromagnetic interference, the magnet, and the perioperative care of patients with pacemakers and defibrillators</p>
+  </header>
+
+  <div class="tools">
+    <button class="tool" id="btn-refs" type="button" aria-haspopup="dialog">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5h8.5a1.5 1.5 0 0 1 1.5 1.5v9.5H4.5A1.5 1.5 0 0 1 3 12V2.5Z M3 12a1.5 1.5 0 0 1 1.5-1.5H13" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+      Sources
+    </button>
+    <button class="tool" id="btn-about" type="button" aria-haspopup="dialog">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 7v4.5M8 4.6v.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      About
+    </button>
+    <button class="tool" id="btn-theme" type="button" aria-label="Switch between the light and dark themes">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 2.5a5.5 5.5 0 0 1 0 11Z" fill="currentColor"/></svg>
+      <span id="theme-label">Dark</span>
+    </button>
+  </div>
+
+  <aside class="panel" id="panel" aria-live="off"></aside>
+  <main class="stage" id="stage"></main>
+
+  <nav class="transport" aria-label="Chapters">
+    <button class="play" id="btn-play" type="button" aria-label="Play the chapters in order" aria-pressed="false">
+      <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5Z" fill="currentColor"/></svg>
+      <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true" hidden><path d="M4 2.5h3v11H4zM9 2.5h3v11H9z" fill="currentColor"/></svg>
+    </button>
+    <div class="chapters" id="chapters"></div>
+  </nav>
+</div>
+
+<dialog id="dlg-refs" aria-labelledby="refs-title">
+  <div class="dh"><h2 id="refs-title">Sources</h2><button class="x" type="button" data-close>Close</button></div>
+  <div class="db"><ol id="refs-list"></ol></div>
+</dialog>
+
+<dialog id="dlg-about" aria-labelledby="about-title">
+  <div class="dh"><h2 id="about-title">About this guide</h2><button class="x" type="button" data-close>Close</button></div>
+  <div class="db disclaimer">
+    <p>This guide teaches the perioperative management of cardiac implantable electronic devices (CIEDs). It follows the cardiothoracic fellowship lecture on CIEDs, the four-part review series on device interrogation for anesthesiologists (Abbott/St. Jude, Boston Scientific, Biotronik, Medtronic), and a two-sided bedside card. Each value carries its source; open <b>Sources</b> for the list.</p>
+    <p><b>Every strip is simulated.</b> One timing model of a pacemaker and defibrillator draws every ECG and marker channel. Its intervals, refractory periods and detection rules are typical values chosen to show each behavior; they are not any manufacturer's algorithm, and detection and charge times vary by device and programming.</p>
+    <p><b>The bedside card is a draft for discussion and is not approved.</b> Items it marks <span class="tag confirm">confirm</span> are unresolved and are shown with that tag here. Where newer sources on the card differ from the 2018–2020 reviews, both are shown with their dates.</p>
+    <p>This is an educational resource. It does not replace the device's manual, the manufacturer's technical service, the patient's CIED team or local policy. Interrogation and programming should be done by trained, credentialed practitioners.</p>
+    <p>Keys: ← and → change chapter; the space bar plays or pauses the tour.</p>
+  </div>
+</dialog>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
