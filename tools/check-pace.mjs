@@ -106,6 +106,18 @@ const near = (a, b, tol = 3) => Math.abs(a - b) <= tol;
   ok(near(a.vRate(4000), 85, 2), `magnet (DOO 85) ends PMT: rate ${a.vRate(4000)}`);
 }
 
+{ // PMT starts whenever in the cycle the PVC is requested (PVARP 250), and never with PVARP 350
+  const run = (pvarp, t0) => {
+    const s = new Sim({ mode: 'DDD', lrl: 60, url: 120, sav: 170, pvarp }, { sinus: 70, av: 'chb', escape: 0, va: 280 });
+    s.advance(t0); s.inject('pvc'); s.advance(t0 + 8000);
+    return s.vRate(4000);
+  };
+  const t0s = Array.from({ length: 18 }, (_, i) => 3000 + i * 50);
+  const on = t0s.filter(t => near(run(250, t), 120, 2)).length, off = t0s.filter(t => run(350, t) < 80).length;
+  ok(on === t0s.length, `PMT from a PVC at any phase, PVARP 250: ${on}/${t0s.length}`);
+  ok(off === t0s.length, `no PMT at any phase, PVARP 350: ${off}/${t0s.length}`);
+}
+
 { // T-wave oversensing: sensitivity below the T-wave amplitude adds pauses
   const s = new Sim({ mode: 'VVI', lrl: 70, vSens: 0.8 }, { sinus: 0, av: 'chb', escape: 0, tAmp: 1.5 });
   s.advance(10000);

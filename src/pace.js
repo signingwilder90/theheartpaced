@@ -294,7 +294,10 @@ export class Sim {
     for (let i = this.inj.length - 1; i >= 0; i--) {
       const e = this.inj[i];
       if (e.t > t) continue;
-      if (e.type === 'pvc' && (t - this.lastAdep < NODE_REF + 50 || t - this.lastVdep < V_REF + 100)) continue;
+      // a PVC waits until the ventricle is excitable and the AV node is free, and until its
+      // retrograde P wave (if any) can reach the atrium before the next sinus beat
+      if (e.type === 'pvc' && (t - this.lastVdep < V_REF + 20 || t - this.lastAdep < NODE_REF
+        || (this.pat.va > 0 && this.pat.sinus > 0 && t + this.pat.va > this.nextSinus - 20))) continue;
       this.inj.splice(i, 1);
       if (e.type === 'pvc' && t - this.lastVdep >= V_REF && !this.vf) { this.ventDepol('pvc'); this.mark('PVC', 'X', { quiet: true }); }
       if (e.type === 'vf') { this.vf = true; this.vfNext = t + 100; this.mark('VF', 'X', { quiet: true }); }

@@ -38,6 +38,13 @@ await page.selectOption('#c-emi-dev', 'icd2'); await page.locator('#c-emi-dep').
 await page.locator('#c-emi-burst').fill('9'); await page.waitForTimeout(14000);
 ok(+(await ro('Shocks')) >= 1, `EMI: ICD, 9-s bursts shock (${await ro('Shocks')})`);
 
+await page.goto(base + '#features'); await page.waitForTimeout(500);
+await click('PMT'); await page.waitForTimeout(1500);
+await click('Premature ventricular beat'); await page.waitForTimeout(6000);
+ok(parseInt(await ro('Ventricular rate')) >= 115, `Features: PVC button starts PMT (${await ro('Ventricular rate')})`);
+await click('Magnet on / off'); await page.waitForTimeout(5000);
+ok(parseInt(await ro('Ventricular rate')) <= 90, `Features: magnet ends PMT (${await ro('Ventricular rate')})`);
+
 await page.goto(base + '#plan'); await page.waitForTimeout(500);
 await page.locator('.flow .node.click').first().click(); await page.waitForTimeout(200);
 ok((await page.locator('.info .verdict').first().textContent()).includes('Identify'), 'Plan: clicking a box opens its note');
