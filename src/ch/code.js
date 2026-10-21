@@ -29,7 +29,7 @@ export default {
   steps: [
     { set: { p1: 'V', p2: 'V', p3: 'I', p4: 'O', p5: 'O' }, note: '<b>VVI.</b> The ventricle is paced at the lower rate and inhibited by a sensed QRS. The P waves of the heart block march through and are ignored.' },
     { set: { p1: 'D', p2: 'D', p3: 'D' }, note: '<b>DDD.</b> Each sensed P wave starts an AV delay that ends in a ventricular pulse: the device restores AV synchrony across the block.' },
-    { set: { p1: 'A', p2: 'A', p3: 'I' }, note: '<b>AAI in heart block.</b> Atrial pacing does not reach the ventricle, which beats only at its escape rate of 35 per minute.' },
+    { set: { p1: 'A', p2: 'A', p3: 'I' }, note: '<b>AAI in heart block.</b> The device senses the sinus P waves and stays silent; the P waves are blocked, and the ventricle beats only at its escape rate of 35 per minute.' },
     { set: { p1: 'V', p2: 'O', p3: 'O' }, note: '<b>VOO.</b> Pacing at 60 captures before the escape rhythm of 35 can fire, so nothing competes: this strip looks the same in VOO and VVI.' },
     { set: { p1: 'D', p2: 'D', p3: 'D', p4: 'R', p5: 'V' }, note: '<b>DDDRV.</b> A dual-chamber, rate-modulated, biventricular (CRT) pacemaker. The strip shows the DDD part.' },
   ],
@@ -55,7 +55,7 @@ export default {
 </ol>`,
   quiz: [
     { q: 'What does the fourth letter of <b>DDDR</b> mean in the revised NBG code?', a: ['Remote monitoring', 'Rate modulation', 'Reprogrammable'], c: 1, why: 'Since 2002, position IV shows only whether rate modulation is present (R) or absent (O).<span class="cite" data-ref="nbg2002"></span>' },
-    { q: 'A pacemaker-dependent patient has AAI pacing and new complete heart block. What happens?', a: ['The device switches to DDD', 'The atrium is paced but the ventricle is not; only an escape rhythm (if any) remains', 'Ventricular pacing continues at the lower rate'], c: 1, why: 'An AAI device has no ventricular lead function. Set the patient to complete heart block in the figure to see it.' },
+    { q: 'A pacemaker-dependent patient has AAI pacing and new complete heart block. What happens?', a: ['The device switches to DDD', 'Nothing the device does reaches the ventricle; only an escape rhythm (if any) remains', 'Ventricular pacing continues at the lower rate'], c: 1, why: 'An AAI device paces and senses only the atrium, and in complete heart block no P wave, sensed or paced, conducts. The figure’s patient has complete heart block: choose A, A, I to see it.' },
   ],
   figClass: 'two',
   fig(host, st) {
@@ -92,6 +92,7 @@ export default {
       update: render,
       tick: dt => ls.tick(dt),
       destroy: () => ls.destroy(),
+      sim: ls.sim,
       readouts: () => [
         { k: 'Ventricular rate', v: ls.sim.vRate(), u: '/min' },
         { k: 'Atrial paced', v: ls.sim.pct('AP'), u: '%' },
@@ -99,7 +100,8 @@ export default {
       ],
       live: () => {
         const c = code(st);
-        if (c === 'AAI' || c === 'AOO') return '<b>Atrial pacing in complete heart block.</b> The atrial pulses capture, but the P waves do not conduct; the ventricle beats only at its escape rate.';
+        if (c === 'AAI') return '<b>AAI in complete heart block.</b> The sinus rate (72) is above the lower rate, so the device only senses (AS) and never paces. Sensed or paced, the P waves are blocked: the ventricle beats only at its escape rate of 35.';
+        if (c === 'AOO') return '<b>AOO in complete heart block.</b> Atrial pulses at 60 compete with the sinus rhythm; whether they capture or not, the P waves are blocked and the ventricle beats only at its escape rate of 35.';
         if (c === 'VOO' || c === 'DOO') return '<b>Asynchronous pacing.</b> Pacing at 60 captures before the escape rhythm of 35 can fire, so no intrinsic beat competes and the strip cannot tell VOO from VVI. Asynchronous pacing competes only when the intrinsic rate approaches the paced rate (chapter 02).';
         if (c === 'DDD' || c === 'VDD') return '<b>Tracking.</b> Each sensed P wave (AS) starts the AV delay, and the ventricle is paced (VP) after it: AV synchrony across the block.';
         if (c === 'VVI') return '<b>VVI.</b> The ventricle is paced at the lower rate, regardless of the P waves.';

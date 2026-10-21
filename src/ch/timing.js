@@ -92,6 +92,7 @@ export default {
       update() { ls.sim.set({ url: st.url, sav: st.sav, pvarp: st.pvarp }, { sinus: st.arate }); draw(); },
       tick: dt => ls.tick(dt),
       destroy: () => ls.destroy(),
+      sim: ls.sim,
       readouts: () => {
         const tarp = st.sav + st.pvarp;
         return [

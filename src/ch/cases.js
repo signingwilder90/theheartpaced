@@ -114,6 +114,7 @@ export default {
         ls.tick(dt);
       },
       destroy: () => ls.destroy(),
+      sim: ls.sim,
       readouts: () => [{ k: 'Ventricular rate', v: ls.sim.vRate(5000), u: '/min' }, { k: 'Shocks', v: ls.sim.recent(30000).filter(e => e.shock).length }],
     };
   },

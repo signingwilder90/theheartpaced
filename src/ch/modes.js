@@ -72,6 +72,7 @@ export default {
       },
       tick: dt => ls.tick(dt),
       destroy: () => ls.destroy(),
+      sim: ls.sim,
       readouts: () => {
         const r = ls.sim.vRate(), lp = ls.sim.longestPause(6000);
         return [

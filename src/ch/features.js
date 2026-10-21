@@ -139,6 +139,7 @@ export default {
       },
       tick: dt => ls.tick(dt),
       destroy: () => ls.destroy(),
+      sim: ls.sim,
       readouts: () => [
         { k: 'Ventricular rate', v: ls.sim.vRate(5000), u: '/min' },
         { k: 'Ventricular paced', v: ls.sim.pct('VP', 6000), u: '%' },

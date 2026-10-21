@@ -252,6 +252,19 @@ document.addEventListener('keydown', e => {
 stage.addEventListener('pointerdown', () => stopTour(), { passive: true });
 window.addEventListener('hashchange', () => go(location.hash.slice(1), true));
 
+// Test hook for tools/audit.mjs: drive the current chapter faster than real time.
+window.__cied = {
+  go: k => go(k, true),
+  set: (k, v) => set(k, v),
+  act: a => { cur.fig.action?.(a); refresh(); },
+  run: ms => { for (let t = 0; t < ms; t += 20) cur.fig.tick?.(20); refresh(); },
+  sim: () => cur.fig.sim,
+  state: () => cur.state,
+  readouts: () => cur.fig.readouts?.() || [],
+  live: () => cur.fig.live?.() || '',
+  text: () => document.getElementById('stage').innerText,
+};
+
 buildBar();
 buildRefs();
 const first = location.hash.slice(1);

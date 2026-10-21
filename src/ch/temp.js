@@ -26,7 +26,7 @@ export default {
     { set: { mode: 'VVI', rate: 80, out: 10, thr: 3, sens: 2, ramp: 6, rhythm: 'chb', noise: false }, note: '<b>Normal function.</b> Output 10 mA, threshold 3 mA: every pulse captures.' },
     { set: { thr: 12 }, note: '<b>Rising threshold.</b> Output below threshold: spikes without capture. Increase the output.' },
     { set: { thr: 3, rhythm: 'brady', rate: 50, ramp: 1.5, sens: 2 }, note: '<b>Undersensing.</b> The 1.5-mV R wave is below the 2-mV setting, so the pacemaker competes with conducted beats. Increase sensitivity (lower the number).' },
-    { set: { ramp: 6, noise: true, rhythm: 'chb', rate: 80 }, note: '<b>Oversensing.</b> Noise on the wires inhibits the output. Reduce sensitivity (raise the number).' },
+    { set: { ramp: 6, noise: true, rhythm: 'chb', rate: 80 }, note: '<b>Oversensing.</b> Noise on the wires inhibits the output, and only the escape rhythm at 40 remains. Reduce sensitivity (raise the number).' },
   ],
   prose: `
 <h3>Indications</h3>
@@ -81,6 +81,7 @@ export default {
         if (ls.sim.t - last > 500) { last = ls.sim.t; render(); }
       },
       destroy: () => ls.destroy(),
+      sim: ls.sim,
       readouts: () => [
         { k: 'Ventricular rate', v: ls.sim.vRate(5000), u: '/min' },
         { k: 'Output : threshold', v: (st.out / st.thr).toFixed(1), u: ': 1', f: st.out < st.thr ? 'flag' : st.out / st.thr < 2 ? 'warn' : 'ok' },

@@ -87,6 +87,7 @@ export default {
       },
       tick(dt) { ls.tick(dt); if (ls.sim.t - last > 1000) { last = ls.sim.t; render(); } },
       destroy: () => ls.destroy(),
+      sim: ls.sim,
       readouts: () => [
         { k: 'Rhythm', v: ls.sim.vf ? 'VF' : 'sinus', f: ls.sim.vf ? 'flag' : '' },
         { k: 'Therapy', v: ls.sim.dev.suspend ? 'suspended' : 'on' },

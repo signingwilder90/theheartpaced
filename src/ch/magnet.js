@@ -203,6 +203,7 @@ export default {
         ls.tick(dt);
       },
       destroy: () => ls.destroy(),
+      sim: ls.sim,
       readouts: () => [
         { k: 'Mode now', v: ls.sim.dev.mode },
         { k: 'Ventricular rate', v: ls.sim.vRate(4000), u: '/min' },

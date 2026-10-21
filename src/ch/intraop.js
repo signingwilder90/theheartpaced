@@ -41,7 +41,7 @@ export default {
 <p>A 75-year-old woman with a cardiomyopathy (EF 30%) and an ICD is having a two-level lumbar fusion. The anesthesiologist and surgeon agree on bipolar cautery only, but a second surgeon uses monopolar cautery and the ICD discharges inappropriately. Once she is prone, how will a magnet be placed or the device reprogrammed? If the magnet is dislodged, how will anyone know? The case calls for discussion and coordination between the surgical, anesthesia and EP or cardiology services before the case<span class="cite" data-ref="lecture"></span>.</p>
 <h3>Line placement</h3>
 <p>In theory, antitachyarrhythmia therapy should be suspended during central line placement; monitor the ECG and pulse. Leads can be dislodged, especially in the first months after implantation<span class="cite" data-ref="lecture"></span>.</p>
-<p class="note">In the model, the ICD detects VF from 8 of 10 short intervals and charges for 6 s before reconfirming. Real detection and charge times vary by device and programming. External pads always terminate VF in the model.</p>`,
+<p class="note">In the model, the ICD detects VF from 8 of 10 short intervals, charges for 6 s and reconfirms before shocking; a return of normal intervals during charging diverts the charge. Real detection and charge times vary by device and programming. External pads always terminate VF in the model.</p>`,
   quiz: [
     { q: 'An ICD patient with a magnet develops VF. What is the first device-related step?', a: ['Reprogram the ICD', 'Remove the magnet so the ICD can treat, and stop EMI', 'Replace the magnet'], c: 1, why: 'Removing the magnet restores detection and therapy; if that fails, shock externally.<span class="cite" data-ref="lecture"></span>' },
     { q: 'Why is a pulse oximeter or arterial line needed with a paced rhythm?', a: ['Pacing spikes can mask loss of capture on the ECG', 'Pacemakers interfere with blood pressure cuffs', 'The ECG is turned off during cautery'], c: 0, why: 'A spike on the monitor does not prove mechanical capture; a pulse signal independent of the ECG does.<span class="cite" data-ref="lecture,card"></span>' },
@@ -82,6 +82,7 @@ export default {
         ls.tick(dt);
       },
       destroy: () => ls.destroy(),
+      sim: ls.sim,
       readouts: () => {
         const sim = ls.sim, lp = sim.longestPause(4000), noPulse = sim.vf || lp > 3000;
         return [

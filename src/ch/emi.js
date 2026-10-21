@@ -187,6 +187,7 @@ export default {
         ls.tick(dt);
       },
       destroy: () => ls.destroy(),
+      sim: ls.sim,
       readouts: () => {
         const sim = ls.sim, lp = sim.longestPause(10000), shocks = sim.recent(20000).filter(e => e.shock).length;
         return [
@@ -206,7 +207,7 @@ export default {
         if (shocks) return '<b>Inappropriate shock.</b> The ICD counted the noise as VF, charged and, with noise still present at reconfirmation, delivered a shock.';
         if (D.icd && st.protect === 'magnet' && st.dep && !D.nopace) return '<b>Shocks suspended, pacing inhibited.</b> The ICD magnet does not change the pacing mode, so the dependent patient has a pause during every burst.';
         if (lp > 2000 && st.dep) return `<b>Pacing inhibited.</b> The device read the noise as intrinsic activity and withheld pacing; the pause lasted ${(lp / 1000).toFixed(1)} s.`;
-        if (D.icd && st.protect === 'none' && st.burst <= 5) return '<b>Detection without therapy.</b> Short bursts may start detection and charging, but the noise has stopped by reconfirmation and the shock is aborted. Longer bursts are shocked.';
+        if (D.icd && st.protect === 'none' && st.burst <= 5) return '<b>Detection without therapy.</b> A short burst can start detection and charging, but once the noise stops and normal intervals return, the charge is diverted (Aborted). A burst that outlasts detection and charging is shocked.';
         if (st.protect !== 'none') return '<b>Protected.</b> ' + (D.icd ? 'Tachy therapies are off or suspended.' : 'Asynchronous pacing ignores the noise.');
         return '<b>Noise sensed.</b> Watch the marker channel: noise on the atrial lead is tracked, noise on the ventricular lead inhibits.';
       },

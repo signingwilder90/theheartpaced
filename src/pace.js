@@ -268,6 +268,11 @@ export class Sim {
       }
       return;
     }
+    // non-committed: a return to slow intervals while charging diverts the charge
+    const tail = s.hist.slice(-2);
+    if (tail.length === 2 && tail.every(x => x >= fast) && s.hist.length >= 2 && t - s.charging > 500) {
+      this.mark('Aborted', 'X'); s.charging = null; s.hist = []; return;
+    }
     if (t - s.charging >= dv.charge) {
       const last = s.hist.slice(-4);
       const still = last.length === 4 && last.every(x => x < fast) && t - s.icdLast < 400;
