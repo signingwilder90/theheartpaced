@@ -3,6 +3,15 @@
 
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
+const PULSE_DELAY = 180;   // ms from ventricular depolarization to the start of the pleth upstroke
+const NO_PULSE_MS = 2500;  // pleth alarm after this long without a pulse
+
+// Time since the last pulse the pleth would show, for readouts.
+export function msSincePulse(sim) {
+  const v = sim.vdeps[sim.vdeps.length - 1];
+  return v ? Math.max(0, sim.t - v.t - PULSE_DELAY) : sim.t;
+}
+
 export class Strip {
   constructor(host, sim, opts = {}) {
     this.sim = sim;
@@ -40,11 +49,12 @@ export class Strip {
     const C = {
       bg: css('--screen'), grid: css('--screen-grid'), grid2: css('--screen-grid-2'),
       trace: css('--trace'), sense: css('--sense'), pace: css('--pace'), text: css('--screen-text'),
-      dim: css('--screen-dim'), alarm: css('--alarm'), band: css('--screen-band'), mag: css('--magnet'),
+      dim: css('--screen-dim'), alarm: css('--alarm'), band: css('--screen-band'), mag: css('--magnet'), pleth: css('--pleth'),
     };
     const W = this.win, T = sim.t;
     const top = 26, markH = this.opts.markers ? Math.min(78, h * 0.34) : 0, bottom = 18;
-    const ecgTop = top, ecgH = h - top - markH - bottom;
+    const plethH = this.opts.pleth ? Math.max(46, h * 0.22) : 0;
+    const ecgTop = top, ecgH = h - top - markH - plethH - bottom;
     const mid = ecgTop + ecgH * 0.58;
     const mvPx = Math.min(ecgH * 0.36, 70);           // pixels per mV
     const x = t => ((t % W) + W) % W / W * w;
@@ -100,7 +110,7 @@ export class Strip {
     // header (after the erase bar so it is never cut)
     ctx.fillStyle = C.bg; ctx.fillRect(0, 0, w, top - 4);
     ctx.fillStyle = C.text; ctx.font = `500 11px ${css('--mono')}`; ctx.textBaseline = 'middle';
-    ctx.fillText(this.opts.title, 10, 13);
+    ctx.fillText(w < 520 && this.opts.short ? this.opts.short : this.opts.title, 10, 13);
     let sub = '';
     try { sub = this.opts.sub(sim) || ''; } catch { /* chapter not ready on the first draw */ }
     ctx.textAlign = 'right'; ctx.fillText(sub, w - 10, 13); ctx.textAlign = 'left';
@@ -113,6 +123,44 @@ export class Strip {
       ctx.strokeStyle = C.pace; ctx.lineWidth = 1.4;
       const hgt = e.code === 'VP' ? 0.9 : 0.6;
       ctx.beginPath(); ctx.moveTo(px, mid + 4); ctx.lineTo(px, mid - hgt * mvPx); ctx.stroke();
+    }
+
+    // pulse oximeter plethysmogram: one pulse after each beat that captures the ventricle.
+    // Electrical noise does not reach it, so it shows perfusion when the ECG cannot.
+    if (this.opts.pleth) {
+      const py0 = ecgTop + ecgH + 4, pH = plethH - 8, base = py0 + pH - 4;
+      const beats = sim.vdeps.filter(d => d.t > t0 - 1200 && d.t <= T);
+      const amp = d => (d.kind === 'pvc' ? 0.5 : 1);
+      const pv = t => {
+        let v = 0;
+        for (const d of beats) {
+          const u = t - d.t - PULSE_DELAY;
+          if (u > 0 && u < 900) v += amp(d) * (Math.exp(-0.5 * ((u - 120) / 55) ** 2) + 0.35 * Math.exp(-0.5 * ((u - 330) / 70) ** 2));
+        }
+        return v;
+      };
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, py0 - 2.5); ctx.lineTo(w, py0 - 2.5); ctx.stroke();
+      ctx.save(); ctx.beginPath(); ctx.rect(0, py0, w, pH); ctx.clip();
+      ctx.strokeStyle = C.pleth; ctx.lineWidth = 1.6; ctx.beginPath();
+      let prev = null;
+      for (let t = Math.max(0, Math.ceil(t0 / 4) * 4); t <= T; t += 4) {
+        const px = x(t), py = base - Math.min(pv(t), 1.25) * (pH - 10);
+        if (prev === null || px < prev) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        prev = px;
+      }
+      ctx.stroke(); ctx.restore();
+      ctx.fillStyle = C.bg; ctx.fillRect(x(T) + 1, py0, gap / W * w, pH);
+      const since = msSincePulse(sim);
+      const label = (txt, col, font, lx) => {
+        ctx.font = font; const tw = ctx.measureText(txt).width;
+        ctx.fillStyle = C.bg; ctx.globalAlpha = 0.85; ctx.fillRect(lx - 3, py0 + 1, tw + 6, 13); ctx.globalAlpha = 1;
+        ctx.fillStyle = col; ctx.fillText(txt, lx, py0 + 9);
+        return lx + tw + 10;
+      };
+      ctx.textAlign = 'left';
+      const nx = label('SpO2 PLETH', C.pleth, `600 10px ${css('--mono')}`, 8);
+      if (since > NO_PULSE_MS && T > NO_PULSE_MS) label(`NO PULSE ${(since / 1000).toFixed(1)} s`, C.alarm, `700 11px ${css('--mono')}`, nx);
     }
 
     // marker channel

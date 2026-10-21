@@ -84,6 +84,10 @@ await check('Sleep: 14:00 paces at 70', 'features', { feat: 'sleep', hour: 14 },
 
 // ---------------------------------------------------------------- 05 EMI
 await check('Pacemaker, dependent, chole: inhibition for the burst', 'emi', { dev: 'pm2', dep: true, site: 'chole', energy: 'mono', pad: 'rthigh', protect: 'none', burst: 4, cautery: true }, [], 14000, "[A.pause(14000)>=4000, `pause ${A.pause(14000)} ms`]");
+await check('Inhibition: the pleth shows no pulse during the burst', 'emi', { dev: 'pm2', dep: true, site: 'chole', energy: 'mono', pad: 'rthigh', protect: 'none', burst: 6, cautery: true }, [], 0,
+  "(()=>{const s=A.S();let w=null;for(let i=0;i<400&&!w;i++){window.__cied.run(50);w=s.emi.find(x=>x.t0<=s.t&&x.t1>s.t+3500);}window.__cied.run(3200);const r=window.__cied.readouts().find(r=>r.k==='Pulse (pleth)');return [!!w&&r.v==='absent', `in burst ${!!w}; pleth ${r.v}`]})()");
+await check('…and the pulse returns after it', 'emi', {}, [], 0,
+  "(()=>{const s=A.S();for(let i=0;i<400;i++){window.__cied.run(50);if(!s.emi.some(x=>x.t0<=s.t&&x.t1>s.t)&&s.emi.some(x=>x.t1<s.t&&x.t1>s.t-500))break;}window.__cied.run(1500);const r=window.__cied.readouts().find(r=>r.k==='Pulse (pleth)');return [r.v==='present', `pleth ${r.v}`]})()");
 await check('…with a magnet: no pause', 'emi', { protect: 'magnet' }, [], 9000, "[A.pause(7000)<=1000 && A.mode()==='DOO', `pause ${A.pause(7000)} ${A.mode()}`]");
 await check('…reprogrammed DOO: no pause', 'emi', { protect: 'program' }, [], 9000, "[A.pause(7000)<=1000 && A.mode()==='DOO', `pause ${A.pause(7000)} ${A.mode()}`]");
 await check('Noise on the atrial lead is tracked (VP at the upper rate during a burst)', 'emi', { dev: 'pm2', dep: false, site: 'chole', protect: 'none', burst: 6 }, [], 1200,

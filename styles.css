@@ -31,6 +31,7 @@
   --pace: #f08fb8;
   --alarm: #ff6b5c;
   --magnet: rgba(130, 170, 255, 0.12);
+  --pleth: #7cc7ff;
 
   --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
@@ -341,3 +342,6 @@ dialog .x { border: 1px solid var(--rule); background: var(--paper); border-radi
 .tour-status { flex: none; font: 600 0.72rem/1.2 var(--sans); letter-spacing: 0.06em; color: var(--accent); max-width: 11em; }
 .play[aria-pressed="true"] { background: var(--accent); }
 @media (max-width: 900px) { .tour-status { max-width: 6.5em; font-size: 0.66rem; } }
+
+.fig.side.tallstrip { grid-template-rows: minmax(0, 0.8fr) minmax(250px, 1.2fr); }
+@media (max-width: 900px) { .fig.side.tallstrip { grid-template-rows: minmax(0, 0.8fr) minmax(200px, 1.2fr); } }

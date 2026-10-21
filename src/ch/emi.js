@@ -1,4 +1,5 @@
 import { el, s, torso, drawDevice, distToPath, segToPath, liveStrip, BODY } from '../ui.js';
+import { msSincePulse } from '../strip.js';
 
 const DEVICES = {
   pm2: { label: 'Dual-chamber pacemaker, left pectoral', icd: false, pectoral: true },
@@ -107,6 +108,9 @@ export default {
 <li><b>Rate response.</b> A minute-ventilation sensor may drive pacing to its upper rate (chapter 04)<span class="cite" data-ref="lecture"></span>.</li>
 <li><b>Reset</b> of the generator to default settings is rare; damage to the generator or the lead–tissue interface is rarer<span class="cite" data-ref="lecture"></span>.</li>
 </ul>
+<h3>Watch the pulse, not the ECG</h3>
+<p>During cautery the ECG is often unreadable, and the monitor may count the noise as a heart rate. A pulse signal that does not depend on the ECG (plethysmography, an arterial line or Doppler) shows whether the heart is actually ejecting<span class="cite" data-ref="card,lecture"></span>. In the figure the pulse oximeter waveform goes flat while pacing is inhibited, and returns with the first captured beat.</p>
+<p class="note">In the model each captured or intrinsic beat produces a pulse 180 ms after depolarization, and the pleth alarms after 2.5 s without one. Real oximeters average and delay their display, and may show artefact with cautery or motion.</p>
 <h3>Electrocautery</h3>
 <p>Bipolar cautery causes less interference than monopolar. Bursts should be short (under 5 s), and the current path from the active electrode to the return pad kept away from the generator and leads. Surgery below the umbilicus is less likely to interfere<span class="cite" data-ref="lecture"></span>. The bedside card asks for monopolar current in short, irregular bursts under 5 s at the lowest effective energy<span class="cite" data-ref="card"></span>.</p>
 <h3>The bedside card’s EMI risk</h3>
@@ -132,12 +136,12 @@ export default {
     { q: 'An ICD patient who is pacing-dependent has a magnet placed for a laparotomy. Cautery bursts begin. What is expected?', a: ['Asynchronous pacing and no shocks', 'No shocks, but pacing can be inhibited', 'Shocks and asynchronous pacing'], c: 1, why: 'An ICD magnet suspends shocks and ATP only; it gives no pacing protection and never makes the device asynchronous.<span class="cite" data-ref="card,sj2018"></span>' },
     { q: 'Which of these is low risk on the bedside card?', a: ['Monopolar cholecystectomy, thigh pad', 'Monopolar inguinal hernia repair, thigh pad, pectoral pacemaker', 'Bipolar cautery on the generator pocket'], c: 1, why: 'All the low-risk conditions hold: below the umbilicus, more than 15 cm away, path away from the device, no under-body pad, pectoral device.<span class="cite" data-ref="card"></span>' },
   ],
-  figClass: 'side',
+  figClass: 'side tallstrip',
   fig(host, st, ctx) {
     const T = torso(host, { cap: 'Operative site, return pad and current path' });
     const info = el('div', { class: 'card info' });
     host.append(info);
-    const ls = liveStrip(host, program(st), PATIENT(st.dep), { title: 'ECG II · MARKER CHANNEL', sub: () => `${ls.sim.dev.mode}${ls.sim.dev.icd ? (ls.sim.dev.tachy && !ls.sim.dev.suspend ? ' · tachy ON' : ' · tachy SUSPENDED') : ''}` });
+    const ls = liveStrip(host, program(st), PATIENT(st.dep), { title: 'ECG II · SpO2 PLETH · MARKERS', short: 'ECG · PLETH', pleth: true, label: 'Simulated ECG, pulse oximeter waveform and device marker channel', sub: () => `${ls.sim.dev.mode}${ls.sim.dev.icd ? (ls.sim.dev.tachy && !ls.sim.dev.suspend ? ' · tachy ON' : ' · tachy SUSPENDED') : ''}` });
     let G, R, nextBurst = ls.sim.t + 1000, amp = 0;
     const draw = () => {
       T.layer.textContent = '';
@@ -196,6 +200,7 @@ export default {
           { k: 'Site', v: G.below ? 'below umbilicus' : 'above umbilicus' },
           { k: 'Ventricular rate', v: sim.vRate(), u: '/min' },
           { k: 'Longest pause', v: (lp / 1000).toFixed(1), u: 's', f: lp > 2000 ? 'flag' : '' },
+          { k: 'Pulse (pleth)', v: msSincePulse(sim) > 2500 ? 'absent' : 'present', f: msSincePulse(sim) > 2500 ? 'flag' : 'ok' },
           { k: 'Shocks', v: shocks, f: shocks ? 'flag' : '' },
         ];
       },
@@ -206,7 +211,7 @@ export default {
         if (amp < 0.5) return st.energy === 'mono' ? '<b>No interference sensed.</b> The noise reaching the leads stays below the programmed sensitivity.' : '<b>No interference.</b> Bipolar and ultrasonic devices keep the current local.';
         if (shocks) return '<b>Inappropriate shock.</b> The ICD counted the noise as VF, charged and, with noise still present at reconfirmation, delivered a shock.';
         if (D.icd && st.protect === 'magnet' && st.dep && !D.nopace) return '<b>Shocks suspended, pacing inhibited.</b> The ICD magnet does not change the pacing mode, so the dependent patient has a pause during every burst.';
-        if (lp > 2000 && st.dep) return `<b>Pacing inhibited.</b> The device read the noise as intrinsic activity and withheld pacing; the pause lasted ${(lp / 1000).toFixed(1)} s.`;
+        if (lp > 2000 && st.dep) return `<b>Pacing inhibited.</b> The device read the noise as intrinsic activity and withheld pacing; the pause lasted ${(lp / 1000).toFixed(1)} s. The ECG is buried in cautery noise, but the pleth is flat: there is no pulse.`;
         if (D.icd && st.protect === 'none' && st.burst <= 5) return '<b>Detection without therapy.</b> A short burst can start detection and charging, but once the noise stops and normal intervals return, the charge is diverted (Aborted). A burst that outlasts detection and charging is shocked.';
         if (st.protect !== 'none') return '<b>Protected.</b> ' + (D.icd ? 'Tachy therapies are off or suspended.' : 'Asynchronous pacing ignores the noise.');
         return '<b>Noise sensed.</b> Watch the marker channel: noise on the atrial lead is tracked, noise on the ventricular lead inhibits.';
