@@ -52,6 +52,13 @@ ok((await page.locator('.info .verdict').first().textContent()).includes('Identi
 await page.goto(base + '#code'); await page.waitForTimeout(500);
 await page.locator('#btn-play').click(); await page.waitForTimeout(1500);
 ok((await page.locator('.live').textContent()).includes('VVI'), 'Tour: first step applied');
+ok(await page.locator('#btn-play .i-pause').isVisible() && !(await page.locator('#btn-play .i-play').isVisible()), 'Play button shows the pause icon while playing');
+ok((await page.locator('#tour-status').textContent()).includes('step 1 of'), `Tour status visible (${await page.locator('#tour-status').textContent()})`);
+await page.waitForTimeout(7000);
+ok((await page.locator('#tour-status').textContent()).includes('step 2 of'), 'Tour advances to step 2');
+await page.locator('#btn-play').click(); await page.waitForTimeout(300);
+ok(await page.locator('#btn-play .i-play').isVisible() && !(await page.locator('#tour-status').isVisible()), 'Second press pauses');
+await page.locator('#btn-play').click(); await page.waitForTimeout(300);
 await page.keyboard.press('ArrowRight'); await page.waitForTimeout(500);
 ok(page.url().endsWith('#modes'), 'Arrow key: next chapter');
 

@@ -43,12 +43,15 @@ export function flowchart(host, { w, h, nodes, edges, cap }) {
   if (cap) card.append(el('span', { class: 'cap' }, cap));
   const svg = s('svg', { viewBox: `0 0 ${w} ${h}`, class: 'flow', role: 'img', preserveAspectRatio: 'xMidYMid meet' });
   const defs = s('defs', {}, svg);
-  const mk = s('marker', { id: 'arr', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto-start-reverse' }, defs);
-  s('path', { d: 'M0,0 L10,5 L0,10 z', fill: 'context-stroke' }, mk);
+  const uid = 'f' + Math.random().toString(36).slice(2, 7);
+  for (const [id, col] of [['arr', 'var(--rule)'], ['arr-on', 'var(--accent)']]) {
+    const mk = s('marker', { id: `${uid}-${id}`, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto' }, defs);
+    s('path', { d: 'M0,0 L10,5 L0,10 z', style: `fill:${col}` }, mk);
+  }
   const E = {}, N = {};
   for (const e of edges) {
     const g = s('g', { class: 'edge' }, svg);
-    s('path', { d: e.d, 'marker-end': 'url(#arr)' }, g);
+    s('path', { d: e.d, 'marker-end': `url(#${uid}-arr)` }, g);
     if (e.label) s('text', { x: e.lx, y: e.ly, text: e.label, 'text-anchor': e.anchor || 'middle' }, g);
     E[e.id] = g;
   }
@@ -73,7 +76,11 @@ export function flowchart(host, { w, h, nodes, edges, cap }) {
     card, svg, N, E,
     light(nodeIds, edgeIds) {
       for (const [k, g] of Object.entries(N)) g.classList.toggle('on', nodeIds.includes(k));
-      for (const [k, g] of Object.entries(E)) g.classList.toggle('on', edgeIds.includes(k));
+      for (const [k, g] of Object.entries(E)) {
+        const on = edgeIds.includes(k);
+        g.classList.toggle('on', on);
+        g.querySelector('path').setAttribute('marker-end', `url(#${uid}-${on ? 'arr-on' : 'arr'})`);
+      }
     },
   };
 }

@@ -191,8 +191,18 @@ function quiz(items) {
 const tour = { on: false, step: 0, until: 0, note: '' };
 function playBtn() {
   $('btn-play').setAttribute('aria-pressed', String(tour.on));
-  $('btn-play').querySelector('.i-play').hidden = tour.on;
-  $('btn-play').querySelector('.i-pause').hidden = !tour.on;
+  $('btn-play').setAttribute('aria-label', tour.on ? 'Pause the tour' : 'Play the chapters in order');
+  // SVG elements have no .hidden property, so toggle the attribute itself
+  $('btn-play').querySelector('.i-play').toggleAttribute('hidden', tour.on);
+  $('btn-play').querySelector('.i-pause').toggleAttribute('hidden', !tour.on);
+  tourStatus();
+}
+function tourStatus() {
+  const el = $('tour-status');
+  if (!tour.on) { el.hidden = true; return; }
+  const n = (cur.ch.steps || []).length;
+  el.hidden = false;
+  el.textContent = n ? `Playing ${cur.ch.num} · step ${Math.max(1, tour.step)} of ${n}` : `Playing ${cur.ch.num}`;
 }
 function startTour() { tour.on = true; tour.step = 0; tour.until = 0; playBtn(); }
 function stopTour() { if (!tour.on) return; tour.on = false; tour.note = ''; playBtn(); refresh(); }
@@ -208,7 +218,12 @@ function tourTick(now) {
   for (const [k, v] of Object.entries(st.set || {})) set(k, v, true);
   if (st.act) cur.fig.action?.(st.act);
   tour.note = st.note; tour.until = now + (st.ms || 7000);
-  refresh();
+  refresh(); tourStatus();
+  // bring the step's note into view inside the text panel (desktop layout)
+  if (panel.scrollHeight > panel.clientHeight + 4) {
+    const top = cur.live.offsetTop - panel.offsetTop - 12;
+    if (top < panel.scrollTop || top > panel.scrollTop + panel.clientHeight - 120) panel.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
+  }
 }
 
 // ------------------------------------------------------------------ loop
