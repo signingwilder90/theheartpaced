@@ -136,7 +136,7 @@ function go(key, user) {
   document.querySelectorAll('.chap').forEach(b => b.setAttribute('aria-current', String(b.dataset.key === ch.key)));
   document.querySelector(`.chap[data-key="${ch.key}"]`)?.scrollIntoView({ inline: 'center', block: 'nearest' });
   if (location.hash.slice(1) !== ch.key) history.replaceState(null, '', '#' + ch.key);
-  document.title = `${ch.title} · The Paced Heart`;
+  document.title = `${ch.title} · The Heart, Paced`;
   store.set('cied-ch', ch.key);
 }
 
